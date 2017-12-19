@@ -1,0 +1,59 @@
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+body {
+	background: #191919;
+}
+#game {
+	position: relative;
+	margin: 40px auto 20px;
+}
+
+.upright .translateY,
+.sideways .translateX {
+	transition: transform 0.3s cubic-bezier(0.21, -0.61, 0.46, -0.34);
+}
+.sideways .translateY,
+.upright .translateX,
+.falling.sideways .translateX,
+.falling.upright .translateX,
+.falling.sideways .translateY,
+.falling.upright .translateY {
+	transition: transform 0.3s ease;
+}
+
+#game .explode-leave .square {
+	background: none;
+	opacity: 0;
+	transform: scale(0);
+	transition: all 0.3s ease;
+}
+.square {
+	border-radius: 25%;
+	height: 96%;
+	position: absolute;
+	width: 96%;
+}
+
+.color-4 {
+	background: #0b2239;
+}
+.color-3 {
+	background: #0a4a2c;
+}
+.color-2 {
+	background: #1a8037;
+}
+.color-1 {
+	background: #83af3f;
+}
+.color-0 {
+	background: #ddcd22;
+}
+
+.rotating {
+	transition: all 0.3s ease;
+}
