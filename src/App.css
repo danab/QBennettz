@@ -57,3 +57,14 @@ body {
 .rotating {
 	transition: all 0.3s ease;
 }
+
+.timer {
+	margin: auto;
+	border-radius: 5px;
+	height: 10px;
+	background: white;
+}
+
+.timer-active {
+	transition: width 10s linear;
+}
