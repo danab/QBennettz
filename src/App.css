@@ -7,11 +7,159 @@
 body {
 	background: #191919;
 }
+
+#wrapper {
+	margin: auto;
+	width: 500px;
+}
+
 #game {
 	position: relative;
 	margin: 40px auto 20px;
 }
 
+.clearfix {
+	content: '';
+	display: table;
+	clear: both;
+}
+
+.header {
+	width: 100%;
+}
+
+h1 {
+	float: left;
+	margin-top: 40px;
+	font-family: Helvetica Neue, Arial, sans-serif;
+	font-size: 3.2em;
+	color: white;
+}
+
+.header-container {
+	float: right;
+}
+.score-container {
+	margin-top: 40px;
+	float: left;
+	position: relative;
+}
+.score-container + .score-container {
+	margin-left: 10px;
+}
+
+.score {
+	/* position: relative; */
+	/* display: inline-block; */
+	/* background: #0b2239; */
+	background: #0a4a2c;
+	padding: 10px 10px;
+	font-size: 1.2em;
+	/* height: 25px; */
+	/* line-height: 47px; */
+	font-weight: bold;
+	border-radius: 3px;
+	/* color: white; */
+
+	color: #ddcd22;
+	margin-top: 8px;
+	text-align: center;
+}
+
+.score-header {
+	color: #efef00;
+	font-size: 0.6em;
+}
+
+.moves {
+	text-align: center;
+}
+.moves .icon-holder {
+	display: inline-block;
+	margin: 10px;
+	cursor: pointer;
+}
+
+.moves-holder {
+	vertical-align: top;
+}
+.moves-holder-wrapper {
+	color: white;
+	text-align: center;
+	height: 80px;
+	width: 80px;
+	cursor: default;
+}
+
+.moves-header {
+	font-size: 1.4em;
+	margin-top: 10px;
+	font-weight: bold;
+}
+
+.moves-remaining {
+	font-size: 2em;
+}
+
+/*  Why doesn't this work? */
+.moves i {
+	color: white;
+	font-size: 80px;
+}
+
+h1 span {
+	color: rgb(223, 255, 163);
+}
+
+.overlay {
+	box-sizing: content-box;
+	top: -1em;
+	color: #ddcd22;
+	background: rgba(10, 74, 44, 0.9);
+	right: -1em;
+	padding: 1em;
+	border-radius: 2em;
+	position: absolute;
+
+	animation-name: fadein;
+	/* animation-iteration-count: infinite; */
+	animation-duration: 0.8s;
+	animation-timing-function: ease;
+}
+
+/* Didn't work with CSSTransitionGroup...not a high priority */
+/* .overlay-leave {
+	animation-name: fadein;
+	animation-duration: 8s;
+	animation-direction: reverse;
+	animation-timing-function: linear;
+} */
+.overlay h2 {
+	text-align: center;
+	font-size: 2.8em;
+	margin-top: 40px;
+}
+
+.overlay h3 {
+	text-align: center;
+	font-size: 1.6em;
+	margin-top: 1em;
+}
+
+.overlay h3 span {
+	color: white;
+}
+
+.overlay-text {
+	font-size: 1.2em;
+	margin: 40px 20px;
+	text-align: center;
+}
+
+.translateX,
+.translateY {
+	will-change: transform;
+}
 .upright .translateY,
 .sideways .translateX {
 	transition: transform 0.3s cubic-bezier(0.21, -0.61, 0.46, -0.34);
@@ -27,7 +175,7 @@ body {
 
 #game .explode-leave .square {
 	background: none;
-	opacity: 0;
+	/* opacity: 0; */
 	transform: scale(0);
 	transition: all 0.3s ease;
 }
@@ -59,12 +207,153 @@ body {
 }
 
 .timer {
-	margin: auto;
+	background: white;
 	border-radius: 5px;
 	height: 10px;
-	background: white;
+	margin: auto;
 }
 
-.timer-active {
-	transition: width 10s linear;
+.timer-wrapper {
+	margin: auto;
+}
+.timer-animation {
+	animation-name: timer;
+	animation-timing-function: linear;
+}
+
+@keyframes fadein {
+	from {
+		opacity: 0;
+		/* top: 0;
+		left: 0;
+		padding: 0; */
+	}
+
+	to {
+		/* top: -1em;
+		left: -1em; */
+		opacity: 1;
+		/* padding: 1em; */
+	}
+}
+
+@keyframes timer {
+	from {
+		width: 100%;
+		background: white;
+	}
+
+	79% {
+		background: white;
+	}
+	80% {
+		background: red;
+	}
+	to {
+		width: 0;
+		background: red;
+	}
+}
+
+.btn {
+	background: #83af3f;
+	border: 0 none;
+	border-radius: 6px 6px 6px 6px;
+	color: #ffffff;
+	cursor: pointer;
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 1.125em;
+	font-family: 'Lato', 'Helvetica Neue', 'Helvetica', Helvetica, Arial,
+		sans-serif;
+	margin: 0 0.625em;
+	outline: 0 none;
+	text-decoration: none;
+	line-height: inherit;
+	padding: 0.875em 1.125em;
+	margin-bottom: 0.625em;
+}
+
+.btn:hover {
+	background: #a9cc73;
+}
+
+.highscore-input {
+	text-align: center;
+}
+
+.highscore-input input {
+	background: transparent;
+	height: 80px;
+	font-size: 80px;
+	margin: 20px;
+	padding: 0 0.2em;
+	text-align: center;
+	font-family: Courier New, Courier, monospace;
+}
+
+@keyframes scorefadeout {
+	from {
+		opacity: 1;
+		top: 50%;
+	}
+
+	90% {
+		opacity: 0.6;
+	}
+	to {
+		top: -30%;
+		/* font-size: 0.8em; */
+		opacity: 0;
+	}
+}
+
+.last-score {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-left: -50px;
+	width: 100px;
+	color: white;
+	text-align: center;
+	font-size: 1.2em;
+	animation-name: scorefadeout;
+	animation-duration: 0.5s;
+	opacity: 0;
+}
+
+.piece-bonus,
+.time-bonus,
+.total-score,
+.next-level {
+	animation-name: zoomFadeIn;
+	animation-duration: 0.6s;
+	/* animation-iteration-count: infinite; */
+	animation-fill-mode: forwards;
+	visibility: hidden;
+}
+
+.time-bonus {
+}
+.piece-bonus {
+	animation-delay: 0.5s;
+}
+.total-score {
+	animation-delay: 1s;
+}
+.next-level {
+	animation-delay: 1.5s;
+}
+
+@keyframes zoomFadeIn {
+	from {
+		font-size: 0.3em;
+		opacity: 0;
+	}
+
+	to {
+		font-size: 1.6em;
+		opacity: 1;
+		visibility: visible;
+	}
 }

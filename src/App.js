@@ -4,6 +4,11 @@ import './App.css';
 import { GAME_SIZE, LEVELS } from './constants';
 
 import Square from './Components/Square';
+import Timer from './Components/Timer';
+import GameOver from './Components/GameOver';
+import LevelOver from './Components/LevelOver';
+import Initial from './Components/InitialOverlay';
+import LastScore from './Components/LastScore';
 
 const createBoard = (dim, colors) => {
 	const board = [];
@@ -40,6 +45,14 @@ const getAdjacentSquares = (dim, board, pileIdx, pileNum) => {
 const parseIdx = (idx, dim) => [Math.floor(idx / dim), idx % dim];
 
 // TODO: Oh shiiiiiit this is convoluted.
+
+const filterFunction = (squaresToCheck, checkedSquares, newSquareIdx) => {
+	return (
+		squaresToCheck.indexOf(newSquareIdx) === -1 &&
+		checkedSquares.indexOf(newSquareIdx) === -1
+	);
+};
+
 const getSquareCollection = (board, row, col) => {
 	const dim = board
 		.map(pile => pile.length)
@@ -51,6 +64,7 @@ const getSquareCollection = (board, row, col) => {
 	let checkedSquares = [squareIdx];
 
 	let squaresToCheck = getAdjacentSquares(dim, board, row, col);
+	const filterFunc = filterFunction.bind(null, squaresToCheck, checkedSquares);
 
 	while (squaresToCheck.length) {
 		const [idx, num] = parseIdx(squaresToCheck.shift(), dim);
@@ -58,12 +72,7 @@ const getSquareCollection = (board, row, col) => {
 		if (board[idx][num].val === color) {
 			collection.push(idx * dim + num);
 			let newSquaresToCheck = getAdjacentSquares(dim, board, idx, num);
-			let noCopies = newSquaresToCheck.filter(newSquareIdx => {
-				return (
-					squaresToCheck.indexOf(newSquareIdx) === -1 &&
-					checkedSquares.indexOf(newSquareIdx) === -1
-				);
-			});
+			let noCopies = newSquaresToCheck.filter(filterFunc);
 			squaresToCheck = squaresToCheck.concat(noCopies);
 		}
 		checkedSquares.push(idx * dim + num);
@@ -196,127 +205,6 @@ const rotateBoardCounter = board => {
 	return newBoard.map(pile => pile.filter(square => square !== undefined));
 };
 
-class Timer1 extends PureComponent {
-	constructor(props) {
-		super(props);
-		this.state = {
-			reset: true,
-			active: false
-		};
-
-		this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
-	}
-
-	componentDidMount() {
-		// Is this reliable?
-		setTimeout(() => this.setState({ active: true, reset: false }), 1);
-	}
-
-	handleTransitionEnd() {
-		this.props.setGameOver();
-	}
-
-	componentWillReceiveProps(newProps) {
-		// Stopping
-		if (this.props.active && !newProps.active) {
-			this.setState({ active: false });
-		}
-
-		// New Level
-		if (!this.props.active && newProps.active) {
-			this.setState({ reset: true }, () => {
-				setTimeout(() => this.setState({ reset: false, active: true }), 1);
-			});
-		}
-	}
-
-	getPercentLeft() {
-		if (this.state.reset) {
-			return 1;
-		}
-
-		const currentTime = new Date().getTime();
-		const endTime = this.props.startTime + this.props.time * 1000;
-
-		if (currentTime > endTime) {
-			return 0;
-		}
-
-		const percentLeft = (endTime - currentTime) / (this.props.time * 1000);
-		return percentLeft;
-	}
-
-	render() {
-		const width = this.state.active
-			? '0'
-			: GAME_SIZE * this.getPercentLeft() + 'px';
-
-		const classNames = this.state.active ? 'timer timer-active' : 'timer';
-		return (
-			<div
-				onTransitionEnd={this.handleTransitionEnd}
-				className={classNames}
-				style={{
-					width: width
-				}}
-			/>
-		);
-	}
-}
-
-class Timer extends PureComponent {
-	constructor(props) {
-		super(props);
-		this.state = {
-			percentLeft: 1
-		};
-	}
-
-	componentDidMount() {
-		this.updateTimer();
-	}
-
-	updateTimer() {
-		const currentTime = new Date().getTime();
-		const endTime = this.props.startTime + this.props.time * 1000;
-
-		if (currentTime > endTime) {
-			this.props.setGameOver();
-			return;
-		}
-
-		this.setState({
-			percentLeft: (endTime - currentTime) / (this.props.time * 1000)
-		});
-
-		if (this.props.active) {
-			requestAnimationFrame(this.updateTimer.bind(this));
-		}
-	}
-
-	componentDidUpdate(prevProps) {
-		if (!prevProps.active && this.props.active) {
-			this.updateTimer();
-		}
-	}
-
-	render() {
-		return (
-			<div style={{ width: GAME_SIZE + 'px', margin: 'auto' }}>
-				<div
-					style={{
-						// width: GAME_SIZE * this.state.percentLeft + 'px',
-						transform: `scaleX(${this.state.percentLeft})`,
-						height: '10px',
-						borderRadius: '5px',
-						background: this.state.percentLeft < 0.2 ? 'red' : 'white'
-					}}
-				/>
-			</div>
-		);
-	}
-}
-
 class App extends Component {
 	constructor(props) {
 		super(props);
@@ -324,6 +212,9 @@ class App extends Component {
 		const { dim, colors, time } = LEVELS[level];
 		const startTime = new Date().getTime();
 		this.state = {
+			initialized: false,
+			// Number of clicks in the game?
+			clicks: 0,
 			score: 0,
 			level,
 			levelOver: false,
@@ -332,7 +223,7 @@ class App extends Component {
 			movesLeft: 3,
 			time,
 			board: createBoard(dim, colors),
-			gameOver: false,
+			gameOver: true,
 			rotating: false,
 			rotation: 0,
 			startTime
@@ -340,6 +231,17 @@ class App extends Component {
 
 		this.handleClick = this.handleClick.bind(this);
 		this.setGameOver = this.setGameOver.bind(this);
+		this.handleRestart = this.handleRestart.bind(this);
+		this.goToNextLevel = this.goToNextLevel.bind(this);
+		this.handleKeyDown = this.handleKeyDown.bind(this);
+	}
+
+	componentWillMount() {
+		window.addEventListener('keydown', this.handleKeyDown);
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener('keydown', this.handleKeyDown);
 	}
 
 	setGameOver() {
@@ -349,10 +251,15 @@ class App extends Component {
 	handleClick(row, col) {
 		return e => {
 			const collection = getSquareCollection(this.state.board, row, col);
+			const clicks = this.state.clicks + 1;
 
 			if (collection.length === 1) {
 				// Don't do anything? Deduct score?
-				this.setState({ score: this.state.score - 100 });
+				this.setState({
+					score: this.state.score - 100,
+					lastScore: -100,
+					clicks
+				});
 				return;
 			}
 
@@ -370,15 +277,17 @@ class App extends Component {
 				falling: false,
 				board,
 				score: this.state.score + score,
+				lastScore: score,
 				levelOver,
 				pieceBonus,
-				timeBonus
+				timeBonus,
+				clicks
 			});
 		};
 	}
 	handleRotate() {
 		// set state rotating
-		if (this.state.movesLeft > 0 && !this.state.gameOver) {
+		if (this.hasMovesLeft()) {
 			this.setState({
 				rotating: true,
 				rotationDirection: 1,
@@ -388,7 +297,7 @@ class App extends Component {
 		}
 	}
 	handleRotateCounter() {
-		if (this.state.movesLeft > 0 && !this.state.gameOver) {
+		if (this.hasMovesLeft()) {
 			this.setState({
 				rotating: true,
 				rotationDirection: -1,
@@ -398,11 +307,28 @@ class App extends Component {
 		}
 	}
 	handleRandom() {
-		if (this.state.movesLeft > 0 && !this.state.gameOver) {
+		if (this.hasMovesLeft()) {
 			const board = randomizeBoard(this.state.board);
-			this.setState({ board, movesLeft: this.state.movesLeft - 1 });
+
+			const levelOver = isLevelOver(board, this.state.movesLeft - 1);
+			const pieceBonus = levelOver ? this.getPieceBonus(board) : 0;
+			const timeBonus = levelOver ? this.getTimeBonus() : 0;
+			this.setState({
+				board,
+				movesLeft: this.state.movesLeft - 1,
+				levelOver,
+				pieceBonus,
+				timeBonus
+			});
 		}
 	}
+
+	hasMovesLeft() {
+		return (
+			this.state.movesLeft > 0 && !this.state.gameOver && !this.state.levelOver
+		);
+	}
+
 	handleRestart() {
 		const level = 0;
 		const score = 0;
@@ -413,6 +339,7 @@ class App extends Component {
 			...LEVELS[0],
 			level,
 			startTime,
+			initialized: true,
 			gameOver: false,
 			levelOver: false,
 			board,
@@ -431,6 +358,7 @@ class App extends Component {
 			startTime,
 			levelOver: false,
 			board,
+			lastScore: this.state.pieceBonus + this.state.timeBonus,
 			score: this.state.score + this.state.pieceBonus + this.state.timeBonus
 		};
 		this.setState(newState);
@@ -444,6 +372,12 @@ class App extends Component {
 					: rotateBoardCounter(this.state.board);
 			const rotation = this.state.rotation + this.state.rotationDirection;
 			this.setState({ rotating: false, rotation, falling: true, board });
+
+			if (isLevelOver(board, this.state.movesLeft)) {
+				const pieceBonus = this.getPieceBonus(board);
+				const timeBonus = this.getTimeBonus();
+				this.setState({ levelOver: true, pieceBonus, timeBonus });
+			}
 		}
 	}
 	getTimeBonus() {
@@ -463,6 +397,23 @@ class App extends Component {
 		}
 	}
 
+	handleKeyDown(e) {
+		switch (e.key) {
+			case 'ArrowLeft':
+				this.handleRotateCounter();
+				e.preventDefault();
+				break;
+			case 'ArrowUp':
+				this.handleRandom();
+				e.preventDefault();
+				break;
+			case 'ArrowRight':
+				this.handleRotate();
+				e.preventDefault();
+				break;
+		}
+	}
+
 	render() {
 		// Resize when possible?
 		// const height = this.state.board
@@ -470,6 +421,7 @@ class App extends Component {
 		// 	.reduce((max, len) => Math.max(max, len), 0);
 		// const dim = Math.max( height, this.state.board.length, 2 );
 
+		console.log('render app');
 		const dim = this.state.dim;
 		const squares = createSquares(
 			this.state.board,
@@ -499,7 +451,31 @@ class App extends Component {
 		}
 
 		return (
-			<div>
+			<div id="wrapper">
+				<div className=" header clearfix">
+					<h1>
+						QBe<span>nn</span>e<span>tt</span>z
+					</h1>
+					<div className="header-container">
+						<div className="score-container">
+							<div className="score">
+								<div className="score-header">LEVEL</div>
+								<div>{this.state.level + 1}</div>
+							</div>
+						</div>
+						<div className="score-container">
+							<div className="score">
+								<div className="score-header">SCORE</div>
+								<div>{this.state.score.toLocaleString()}</div>
+							</div>
+
+							<LastScore
+								key={this.state.clicks + this.state.level}
+								score={this.state.lastScore}
+							/>
+						</div>
+					</div>
+				</div>
 				<div
 					style={gameStyle}
 					onTransitionEnd={this.handleTransitionEnd.bind(this)}
@@ -513,74 +489,62 @@ class App extends Component {
 					> */}
 					{squares}
 					{/* </CSSTransitionGroup> */}
-					{this.state.gameOver && (
-						<div
-							style={Object.assign(
-								{
-									transform: 'none',
-									position: 'absolute',
-									background: 'rgba( 255, 255, 255, 0.8 )'
-								},
-								gameStyle
-							)}
-						>
-							Game Over
-						</div>
+					{!this.state.initialized && (
+						<Initial restartGame={this.handleRestart} />
 					)}
+					{this.state.initialized &&
+						this.state.gameOver && (
+							<GameOver
+								restartGame={this.handleRestart}
+								rotation={effectiveRotation}
+								score={this.state.score}
+							/>
+						)}
 					{this.state.levelOver && (
-						<div
-							style={Object.assign(
-								{
-									transform: 'none',
-									position: 'absolute',
-									background: 'rgba( 255, 255, 255, 0.8 )'
-								},
-								gameStyle
-							)}
-						>
-							<h1>Level Over </h1>
-							<div> Time Bonus: {this.state.timeBonus.toLocaleString()} </div>
-							<div> Piece Bonus: {this.state.pieceBonus.toLocaleString()} </div>
-							<div>
-								{' '}
-								Score:{' '}
-								{(
-									this.state.score +
-									this.state.timeBonus +
-									this.state.pieceBonus
-								).toLocaleString()}{' '}
-							</div>
-							<div onClick={this.goToNextLevel.bind(this)}> Next Level </div>
-						</div>
+						<LevelOver
+							level={this.state.level + 1}
+							goToNextLevel={this.goToNextLevel}
+							pieceBonus={this.state.pieceBonus}
+							timeBonus={this.state.timeBonus}
+							rotation={effectiveRotation}
+						/>
 					)}
 				</div>
-				<Timer1
+				<Timer
 					startTime={this.state.startTime}
 					active={!this.state.levelOver && !this.state.gameOver}
 					time={this.state.time}
 					setGameOver={this.setGameOver}
 				/>
-				<div style={{ color: 'white' }}>
-					Score:{this.state.score.toLocaleString()}
+				<div className="moves">
+					<div
+						className="icon-holder"
+						onClick={this.handleRotateCounter.bind(this)}
+					>
+						<i
+							className="fa fa-redo-alt fa-flip-horizontal"
+							style={{ fontSize: '80px', color: 'white' }}
+						/>
+					</div>
+					<div className="icon-holder" onClick={this.handleRandom.bind(this)}>
+						<i
+							className="fa fa-random"
+							style={{ fontSize: '80px', color: 'white' }}
+						/>
+					</div>
+					<div className="icon-holder" onClick={this.handleRotate.bind(this)}>
+						<i
+							className="fa fa-redo-alt"
+							style={{ fontSize: '80px', color: 'white' }}
+						/>
+					</div>
+					<div className="icon-holder moves-holder">
+						<div className="moves-holder-wrapper">
+							<div className="moves-header">MOVES</div>
+							<div className="moves-remaining">{this.state.movesLeft}</div>
+						</div>
+					</div>
 				</div>
-				<div
-					style={{ color: 'white' }}
-					onClick={this.handleRotateCounter.bind(this, this.state.board)}
-				>
-					Rotate Counter
-				</div>
-				<div style={{ color: 'white' }} onClick={this.handleRotate.bind(this)}>
-					Rotate
-				</div>
-				{/* <div class="reloadSingle"></div> */}
-				<div style={{ color: 'white' }} onClick={this.handleRandom.bind(this)}>
-					Random
-				</div>
-				<div style={{ color: 'white' }}>Moves Left: {this.state.movesLeft}</div>
-				<div style={{ color: 'white' }} onClick={this.handleRestart.bind(this)}>
-					Restart
-				</div>
-				<div style={{ color: 'white' }}>Level: {this.state.level + 1}</div>
 			</div>
 		);
 	}
