@@ -109,7 +109,59 @@ class GameOver extends Component {
 			: '';
 		let highscores;
 		if (!scores) {
-			highscores = { original: [] };
+			highscores = {
+				original: [
+					{
+						score: 10,
+						initials: 'MER',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					},
+					{
+						score: 9,
+						initials: 'RY',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					},
+					{
+						score: 7,
+						initials: '',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					},
+					{
+						score: 6,
+						initials: 'XMAS',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					},
+					{
+						score: 5,
+						initials: '',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					},
+					{
+						score: 4,
+						initials: 'LOVE',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					},
+					{
+						score: 3,
+						initials: 'DB!!',
+						level: 1,
+						bestGroup: 0,
+						date: '2017-12-25T15:50:02.129Z'
+					}
+				]
+			};
 		} else {
 			highscores = JSON.parse(scores);
 		}
