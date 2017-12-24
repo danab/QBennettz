@@ -44,13 +44,6 @@ const parseIdx = (idx, dim) => [Math.floor(idx / dim), idx % dim];
 
 // TODO: Oh shiiiiiit this is convoluted.
 
-const filterFunction = (squaresToCheck, checkedSquares, newSquareIdx) => {
-	return (
-		squaresToCheck.indexOf(newSquareIdx) === -1 &&
-		checkedSquares.indexOf(newSquareIdx) === -1
-	);
-};
-
 const getSquareCollection = (board, row, col) => {
 	const dim = board
 		.map(pile => pile.length)
@@ -62,7 +55,6 @@ const getSquareCollection = (board, row, col) => {
 	let checkedSquares = [squareIdx];
 
 	let squaresToCheck = getAdjacentSquares(dim, board, row, col);
-	const filterFunc = filterFunction.bind(null, squaresToCheck, checkedSquares);
 
 	while (squaresToCheck.length) {
 		const [idx, num] = parseIdx(squaresToCheck.shift(), dim);
@@ -70,8 +62,20 @@ const getSquareCollection = (board, row, col) => {
 		if (board[idx][num].val === color) {
 			collection.push(idx * dim + num);
 			let newSquaresToCheck = getAdjacentSquares(dim, board, idx, num);
-			let noCopies = newSquaresToCheck.filter(filterFunc);
-			squaresToCheck = squaresToCheck.concat(noCopies);
+
+			squaresToCheck = squaresToCheck
+				.concat(newSquaresToCheck)
+				// Avoid copies
+				.reduce((cum, current) => {
+					if (cum.indexOf(current) === -1) {
+						cum.push(current);
+					}
+					return cum;
+				}, [])
+				// filter out already checked
+				.filter(idx => {
+					return checkedSquares.indexOf(idx) === -1;
+				});
 		}
 		checkedSquares.push(idx * dim + num);
 	}
@@ -213,6 +217,7 @@ class App extends Component {
 			initialized: false,
 			// Number of clicks in the game?
 			clicks: 0,
+			bestGroup: 0,
 			score: 0,
 			level,
 			levelOver: false,
@@ -253,17 +258,21 @@ class App extends Component {
 
 			if (collection.length === 1) {
 				// Don't do anything? Deduct score?
+				const lastScore = -100 * (this.state.level + 1);
 				this.setState({
-					score: this.state.score - 100,
-					lastScore: -100,
+					score: this.state.score + lastScore,
+					lastScore,
 					clicks
 				});
 				return;
 			}
 
+			const bestGroup = Math.max(this.state.bestGroup, collection.length);
+
 			const board = removeSquaresAndCondense(this.state.board, collection);
 
-			const score = collection.length * collection.length * 5;
+			const score =
+				collection.length * collection.length * (this.state.level + 5);
 
 			const levelOver = isLevelOver(board, this.state.movesLeft);
 
@@ -271,6 +280,7 @@ class App extends Component {
 			const timeBonus = levelOver ? this.getTimeBonus() : 0;
 
 			this.setState({
+				bestGroup,
 				rotating: false,
 				falling: false,
 				board,
@@ -340,6 +350,7 @@ class App extends Component {
 			initialized: true,
 			gameOver: false,
 			levelOver: false,
+			bestGroup: 0,
 			board,
 			score
 		};
@@ -360,6 +371,7 @@ class App extends Component {
 		const newState = {
 			...LEVELS[level],
 			level,
+			bestGroup: 0,
 			startTime,
 			levelOver: false,
 			board,
@@ -503,26 +515,6 @@ class App extends Component {
 							{...this.state}
 						/>
 					)}
-					{/* {!this.state.initialized && (
-						<Initial restartGame={this.handleRestart} />
-					)}
-					{this.state.initialized &&
-						this.state.gameOver && (
-							<GameOver
-								restartGame={this.handleRestart}
-								rotation={effectiveRotation}
-								{...this.state}
-							/>
-						)}
-					{this.state.levelOver && (
-						<LevelOver
-							level={this.state.level + 1}
-							goToNextLevel={this.goToNextLevel}
-							pieceBonus={this.state.pieceBonus}
-							timeBonus={this.state.timeBonus}
-							rotation={effectiveRotation}
-						/> */}
-					{/* )} */}
 				</div>
 				<Timer
 					startTime={this.state.startTime}

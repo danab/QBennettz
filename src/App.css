@@ -125,6 +125,8 @@ h1 {
 
 h1 span {
 	color: rgb(223, 255, 163);
+	color: #83af3f;
+	color: #1a8037;
 }
 
 .overlay {
@@ -309,6 +311,7 @@ h1 span {
 
 .highscore-input input {
 	background: transparent;
+	color: white;
 	height: 60px;
 	font-size: 60px;
 	margin: 10px;

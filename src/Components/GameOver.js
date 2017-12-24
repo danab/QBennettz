@@ -109,12 +109,12 @@ class GameOver extends Component {
 			: '';
 		let highscores;
 		if (!scores) {
-			highscores = [];
+			highscores = { original: [] };
 		} else {
 			highscores = JSON.parse(scores);
 		}
 
-		const isHighScore = checkHighScore(props.score, highscores);
+		const isHighScore = checkHighScore(props.score, highscores.original);
 		this.state = {
 			highscores,
 			isHighScore,
@@ -145,15 +145,19 @@ class GameOver extends Component {
 		if (this.state.initials.length > 1) {
 			const newHighScores = createNewHighScores(
 				this.createScoreObj(),
-				this.state.highscores
+				this.state.highscores.original
 			);
 
+			const newHighScoreObj = {
+				...this.state.highscores,
+				original: newHighScores
+			};
 			this.setState({
 				submitted: true,
-				highscores: newHighScores
+				highscores: newHighScoreObj
 			});
 
-			localStorage.setItem('scores', JSON.stringify(newHighScores));
+			localStorage.setItem('scores', JSON.stringify(newHighScoreObj));
 			localStorage.setItem('initials', this.state.initials);
 		}
 	}
@@ -171,7 +175,7 @@ class GameOver extends Component {
 							currentScore={this.props.score}
 							currentInitials={this.state.initials}
 							restartGame={this.props.restartGame}
-							scores={this.state.highscores}
+							scores={this.state.highscores.original}
 						/>
 					) : (
 						<div>

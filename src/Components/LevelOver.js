@@ -10,7 +10,11 @@ class LevelOver extends Component {
 		const totalBonus = this.props.timeBonus + this.props.pieceBonus;
 		return (
 			<Overlay rotation={this.props.rotation}>
-				<h2>Game Completed!</h2>
+				<h2>
+					{completed
+						? 'Game Completed!'
+						: `Level ${this.props.level} Completed`}
+				</h2>
 				<div>
 					<h3 className="time-bonus">
 						Time Bonus: <span>{this.props.timeBonus.toLocaleString()}</span>
