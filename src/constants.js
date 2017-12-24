@@ -18,7 +18,7 @@ const LEVELS = [
 	// { dim: 14, colors: 4, time: 30, movesLeft: 3 } // 48
 ];
 const GAME_STYLE = {
-	minHeight: GAME_SIZE + 'px',
+	height: GAME_SIZE + 'px',
 	width: GAME_SIZE + 'px'
 };
 

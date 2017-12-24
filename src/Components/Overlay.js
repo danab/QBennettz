@@ -10,7 +10,11 @@ class Overlay extends Component {
 		return (
 			<div
 				className="overlay"
-				style={Object.assign({ transform: rotation }, animation, GAME_STYLE)}
+				style={Object.assign(
+					{ transform: rotation, overflow: 'scroll' },
+					animation,
+					GAME_STYLE
+				)}
 			>
 				{this.props.children}
 			</div>
