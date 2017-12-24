@@ -18,4 +18,8 @@ class Overlay extends Component {
 	}
 }
 
+Overlay.defaultProps = {
+	rotation: 0
+};
+
 export default Overlay;

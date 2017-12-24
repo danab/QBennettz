@@ -6,16 +6,19 @@
 
 body {
 	background: #191919;
+	overflow-x: hidden;
 }
 
 #wrapper {
 	margin: auto;
-	width: 500px;
+	width: 300px;
 }
 
 #game {
 	position: relative;
 	margin: 40px auto 20px;
+	/* Font-awesome has a z-index? I think...? */
+	z-index: 5;
 }
 
 .clearfix {
@@ -24,15 +27,18 @@ body {
 	clear: both;
 }
 
+/* Header Stuff */
+
 .header {
 	width: 100%;
 }
 
 h1 {
 	float: left;
-	margin-top: 40px;
+	margin-top: 60px;
 	font-family: Helvetica Neue, Arial, sans-serif;
-	font-size: 3.2em;
+	font-size: 1.4em;
+	/* font-size: 3.2em; */
 	color: white;
 }
 
@@ -74,6 +80,15 @@ h1 {
 .moves {
 	text-align: center;
 }
+
+.icon-holder {
+	display: inline-block;
+	margin: 10px;
+	cursor: pointer;
+	color: white;
+	font-size: 40px;
+}
+
 .moves .icon-holder {
 	display: inline-block;
 	margin: 10px;
@@ -85,20 +100,21 @@ h1 {
 }
 .moves-holder-wrapper {
 	color: white;
+	font-size: 16px;
 	text-align: center;
-	height: 80px;
-	width: 80px;
+	height: 40px;
+	width: 60px;
 	cursor: default;
 }
 
 .moves-header {
-	font-size: 1.4em;
-	margin-top: 10px;
+	font-size: 1em;
+	/* margin-top: 10px; */
 	font-weight: bold;
 }
 
 .moves-remaining {
-	font-size: 2em;
+	font-size: 1.2em;
 }
 
 /*  Why doesn't this work? */
@@ -125,6 +141,8 @@ h1 span {
 	/* animation-iteration-count: infinite; */
 	animation-duration: 0.8s;
 	animation-timing-function: ease;
+	user-select: none;
+	z-index: 1000;
 }
 
 /* Didn't work with CSSTransitionGroup...not a high priority */
@@ -136,14 +154,17 @@ h1 span {
 } */
 .overlay h2 {
 	text-align: center;
-	font-size: 2.8em;
-	margin-top: 40px;
+	color: #efef00;
+	font-size: 1.9em;
+	/* font-size: 2.8em; */
+	margin-top: 20px;
+	margin-bottom: 1em;
 }
 
 .overlay h3 {
 	text-align: center;
-	font-size: 1.6em;
-	margin-top: 1em;
+	font-size: 1.2em;
+	margin-top: 0.5em;
 }
 
 .overlay h3 span {
@@ -152,7 +173,7 @@ h1 span {
 
 .overlay-text {
 	font-size: 1.2em;
-	margin: 40px 20px;
+	margin: 10px 20px;
 	text-align: center;
 }
 
@@ -255,6 +276,10 @@ h1 span {
 	}
 }
 
+.btn-wrapper {
+	text-align: center;
+	margin: 20px;
+}
 .btn {
 	background: #83af3f;
 	border: 0 none;
@@ -284,12 +309,20 @@ h1 span {
 
 .highscore-input input {
 	background: transparent;
-	height: 80px;
-	font-size: 80px;
-	margin: 20px;
+	height: 60px;
+	font-size: 60px;
+	margin: 10px;
 	padding: 0 0.2em;
 	text-align: center;
 	font-family: Courier New, Courier, monospace;
+}
+
+.highscore-initials {
+	float: left;
+}
+.highscore-date {
+	float: right;
+	display: none;
 }
 
 @keyframes scorefadeout {
@@ -342,6 +375,7 @@ h1 span {
 	animation-delay: 1s;
 }
 .next-level {
+	margin-top: 2em;
 	animation-delay: 1.5s;
 }
 
@@ -355,5 +389,102 @@ h1 span {
 		font-size: 1.6em;
 		opacity: 1;
 		visibility: visible;
+	}
+}
+.highscore-wrapper {
+	text-align: center;
+}
+
+.highscore-table {
+	list-style: none;
+	display: inline-block;
+	/* width: 450px; */
+	width: 260px;
+	text-align: left;
+}
+.highscore-table li {
+	font-size: 1.4em;
+	display: block;
+	position: relative;
+	/* margin-bottom: 10px; */
+	height: 1.2em;
+}
+.highscore-table li.new-score {
+	color: white;
+}
+/* .highscore-table li:not(:nth-child(1)):not(:nth-child(2))  */
+.highscore-score {
+	float: right;
+}
+.highscore-table li:nth-child(1) {
+	font-size: 2.2em;
+	margin-bottom: 0.4em;
+}
+.highscore-table li:nth-child(2) {
+	font-size: 1.8em;
+	margin-bottom: 0.2em;
+}
+.highscore-table li:nth-child(3) {
+	font-size: 1.6em;
+	margin-bottom: 5px;
+}
+@media (min-width: 600px) {
+	#wrapper {
+		width: 500px;
+	}
+
+	h1 {
+		margin-top: 40px;
+		font-size: 3.2em;
+	}
+	.overlay h2 {
+		font-size: 2.8em;
+		margin-bottom: 1.5em;
+	}
+	.overlay h3 {
+		margin: 20px;
+	}
+
+	.overlay-text {
+		font-size: 1.2em;
+		margin: 40px 20px;
+	}
+
+	.next-level {
+		margin-top: 3.5em;
+	}
+	.highscore-input input {
+		height: 80px;
+		font-size: 80px;
+		margin: 20px;
+		padding: 0 0.2em;
+	}
+
+	.moves-holder-wrapper {
+		height: 80px;
+		width: 80px;
+	}
+
+	.moves-header {
+		font-size: 1.4em;
+		margin-top: 10px;
+	}
+
+	.moves-remaining {
+		font-size: 2em;
+	}
+	.icon-holder {
+		font-size: 80px;
+	}
+
+	.highscore-table {
+		width: 450px;
+	}
+	.highscore-score {
+		position: absolute;
+		left: 120px;
+	}
+	.highscore-date {
+		display: block;
 	}
 }

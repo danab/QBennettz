@@ -1,9 +1,9 @@
-const GAME_SIZE = 500;
+const GAME_SIZE = window.innerWidth > 599 ? 500 : 300;
 
 const LEVELS = [
 	// Math done in my head...could...be wrong.
 	// { dim: 12, colors: 4, time: 10, movesLeft: 3 }, // Whatever.
-	{ dim: 10, colors: 4, time: 30, movesLeft: 3 }, // 25
+	// { dim: 10, colors: 4, time: 30, movesLeft: 3 }, // 25
 	{ dim: 4, colors: 2, time: 10, movesLeft: 3 }, // 18
 	{ dim: 5, colors: 2, time: 10, movesLeft: 3 }, // 18
 	{ dim: 6, colors: 2, time: 10, movesLeft: 3 }, // 18
@@ -19,7 +19,7 @@ const LEVELS = [
 	// { dim: 14, colors: 4, time: 30, movesLeft: 3 } // 48
 ];
 const GAME_STYLE = {
-	height: GAME_SIZE + 'px',
+	minHeight: GAME_SIZE + 'px',
 	width: GAME_SIZE + 'px'
 };
 

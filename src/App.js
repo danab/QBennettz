@@ -1,14 +1,12 @@
-import React, { Component, PureComponent } from 'react';
+import React, { Component } from 'react';
 import { CSSTransitionGroup } from 'react-transition-group';
 import './App.css';
 import { GAME_SIZE, LEVELS } from './constants';
 
 import Square from './Components/Square';
 import Timer from './Components/Timer';
-import GameOver from './Components/GameOver';
-import LevelOver from './Components/LevelOver';
-import Initial from './Components/InitialOverlay';
 import LastScore from './Components/LastScore';
+import Overlays from './Components/Overlays';
 
 const createBoard = (dim, colors) => {
 	const board = [];
@@ -346,9 +344,16 @@ class App extends Component {
 			score
 		};
 		this.setState(newState);
+		window.scrollTo(0, 0);
 	}
 	goToNextLevel() {
 		const level = this.state.level + 1;
+
+		if (level === LEVELS.length) {
+			const score =
+				this.state.score + this.state.pieceBonus + this.state.timeBonus;
+			return this.setState({ gameOver: true, levelOver: false, score });
+		}
 		const startTime = new Date().getTime();
 		const { dim, colors } = LEVELS[level];
 		const board = createBoard(dim, colors);
@@ -421,7 +426,6 @@ class App extends Component {
 		// 	.reduce((max, len) => Math.max(max, len), 0);
 		// const dim = Math.max( height, this.state.board.length, 2 );
 
-		console.log('render app');
 		const dim = this.state.dim;
 		const squares = createSquares(
 			this.state.board,
@@ -449,6 +453,8 @@ class App extends Component {
 		if (this.state.falling) {
 			classes += ' falling';
 		}
+
+		const { initialized, levelOver, gameOver } = this.state;
 
 		return (
 			<div id="wrapper">
@@ -489,7 +495,15 @@ class App extends Component {
 					> */}
 					{squares}
 					{/* </CSSTransitionGroup> */}
-					{!this.state.initialized && (
+					{(!initialized || levelOver || gameOver) && (
+						<Overlays
+							restartGame={this.handleRestart}
+							rotation={effectiveRotation}
+							goToNextLevel={this.goToNextLevel}
+							{...this.state}
+						/>
+					)}
+					{/* {!this.state.initialized && (
 						<Initial restartGame={this.handleRestart} />
 					)}
 					{this.state.initialized &&
@@ -497,7 +511,7 @@ class App extends Component {
 							<GameOver
 								restartGame={this.handleRestart}
 								rotation={effectiveRotation}
-								score={this.state.score}
+								{...this.state}
 							/>
 						)}
 					{this.state.levelOver && (
@@ -507,8 +521,8 @@ class App extends Component {
 							pieceBonus={this.state.pieceBonus}
 							timeBonus={this.state.timeBonus}
 							rotation={effectiveRotation}
-						/>
-					)}
+						/> */}
+					{/* )} */}
 				</div>
 				<Timer
 					startTime={this.state.startTime}
@@ -521,22 +535,13 @@ class App extends Component {
 						className="icon-holder"
 						onClick={this.handleRotateCounter.bind(this)}
 					>
-						<i
-							className="fa fa-redo-alt fa-flip-horizontal"
-							style={{ fontSize: '80px', color: 'white' }}
-						/>
+						<i className="fa fa-redo-alt fa-flip-horizontal" />
 					</div>
 					<div className="icon-holder" onClick={this.handleRandom.bind(this)}>
-						<i
-							className="fa fa-random"
-							style={{ fontSize: '80px', color: 'white' }}
-						/>
+						<i className="fa fa-random" />
 					</div>
 					<div className="icon-holder" onClick={this.handleRotate.bind(this)}>
-						<i
-							className="fa fa-redo-alt"
-							style={{ fontSize: '80px', color: 'white' }}
-						/>
+						<i className="fa fa-redo-alt" />
 					</div>
 					<div className="icon-holder moves-holder">
 						<div className="moves-holder-wrapper">
