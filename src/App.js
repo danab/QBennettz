@@ -371,7 +371,6 @@ class App extends Component {
 		const newState = {
 			...LEVELS[level],
 			level,
-			bestGroup: 0,
 			startTime,
 			levelOver: false,
 			board,
