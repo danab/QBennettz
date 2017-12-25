@@ -363,7 +363,8 @@ class App extends Component {
 		if (level === LEVELS.length) {
 			const score =
 				this.state.score + this.state.pieceBonus + this.state.timeBonus;
-			return this.setState({ gameOver: true, levelOver: false, score });
+			const level = this.state.level + 1;
+			return this.setState({ gameOver: true, levelOver: false, score, level });
 		}
 		const startTime = new Date().getTime();
 		const { dim, colors } = LEVELS[level];
